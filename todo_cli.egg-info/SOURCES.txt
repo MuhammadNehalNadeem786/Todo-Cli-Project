@@ -1,0 +1,16 @@
+README.md
+pyproject.toml
+src/__init__.py
+src/app.py
+src/cli/__init__.py
+src/cli/todo_cli.py
+src/models/__init__.py
+src/models/task.py
+src/services/__init__.py
+src/services/todo_service.py
+todo_cli.egg-info/PKG-INFO
+todo_cli.egg-info/SOURCES.txt
+todo_cli.egg-info/dependency_links.txt
+todo_cli.egg-info/entry_points.txt
+todo_cli.egg-info/requires.txt
+todo_cli.egg-info/top_level.txt

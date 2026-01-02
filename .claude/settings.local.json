@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git fetch --all --prune)",
+      "Bash(ls -la specs:*)",
+      "Bash(.specify/scripts/powershell/setup-plan.ps1 -Json)",
+      "Bash(.specify/scripts/powershell/check-prerequisites.ps1 -Json)",
+      "Bash(if [ -f \"tasks.md\" ])",
+      "Bash(then echo \"tasks.md exists\")",
+      "Bash(else echo \"tasks.md does not exist\")",
+      "Bash(fi)",
+      "Bash(if [ -f \"plan.md\" ])",
+      "Bash(then echo \"plan.md exists\")",
+      "Bash(else echo \"plan.md does not exist\")",
+      "Bash(python -m pytest tests/ -v)",
+      "Bash(pip install pytest)",
+      "Bash(python -m pytest tests/unit/models/test_task.py::TestTask::test_create_task_with_required_title -v)",
+      "Bash(python -m src.app add \"Test Task\" --description \"This is a test\")",
+      "Bash(python -m src.app list)",
+      "Bash(python -c \"\nfrom src.services.todo_service import TodoService\nfrom src.cli.todo_cli import TodoCLI\nimport sys\n\n# Create a service instance\nservice = TodoService\\(\\)\n\n# Add a task\ntask = service.add_task\\(''Test Task'', ''This is a test''\\)\nprint\\(f''Task added with ID: {task.id}''\\)\n\n# List tasks\ntasks = service.get_all_tasks\\(\\)\nprint\\(f''Found {len\\(tasks\\)} tasks''\\)\nfor task in tasks:\n    print\\(f'' - {task.id}: {task.title} - {task.description} - Completed: {task.completed}''\\)\n\")",
+      "Bash(python -c \"import src; print\\(''src imported successfully''\\)\")",
+      "Bash(python -c \"\nimport src.models.task\nimport src.services.todo_service\nimport src.cli.todo_cli\nprint\\(''All modules imported successfully''\\)\n\")",
+      "Bash(pip install -e .)",
+      "Bash(todo --help:*)",
+      "Bash(python -m src.app --help)",
+      "Bash(pip uninstall todo-cli -y)",
+      "Bash(python -c \"\nfrom src.services.todo_service import TodoService\nfrom src.models.task import Task\n\n# Test all functionality\nservice = TodoService\\(\\)\n\n# Test 1: Add tasks\ntask1 = service.add_task\\(''Task 1'', ''Description for task 1''\\)\ntask2 = service.add_task\\(''Task 2'', ''Description for task 2''\\)\nprint\\(f''Added {len\\(service.get_all_tasks\\(\\)\\)} tasks''\\)\n\n# Test 2: List tasks\nall_tasks = service.get_all_tasks\\(\\)\nprint\\(f''Found {len\\(all_tasks\\)} tasks via get_all_tasks\\(\\)''\\)\n\n# Test 3: Complete a task\nsuccess = service.complete_task\\(task1.id\\)\nprint\\(f''Completed task: {success}''\\)\nprint\\(f''Task 1 completed status: {service.get_task_by_id\\(task1.id\\).completed}''\\)\n\n# Test 4: Update a task\nsuccess = service.update_task\\(task2.id, title=''Updated Task 2'', description=''Updated description''\\)\nprint\\(f''Updated task: {success}''\\)\nupdated_task = service.get_task_by_id\\(task2.id\\)\nprint\\(f''Updated task title: {updated_task.title}''\\)\n\n# Test 5: Get completed tasks\ncompleted = service.get_completed_tasks\\(\\)\nprint\\(f''Completed tasks: {len\\(completed\\)}''\\)\n\n# Test 6: Get pending tasks\npending = service.get_pending_tasks\\(\\)\nprint\\(f''Pending tasks: {len\\(pending\\)}''\\)\n\n# Test 7: Delete a task\nsuccess = service.delete_task\\(task1.id\\)\nprint\\(f''Deleted task: {success}''\\)\nprint\\(f''Total tasks after deletion: {len\\(service.get_all_tasks\\(\\)\\)}''\\)\n\nprint\\(''All functionality tests passed!''\\)\n\")"
+    ]
+  }
+}

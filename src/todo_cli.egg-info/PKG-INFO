@@ -1,0 +1,158 @@
+Metadata-Version: 2.4
+Name: todo-cli
+Version: 0.1.0
+Summary: A Python CLI application for managing todos
+Requires-Python: >=3.13
+Description-Content-Type: text/markdown
+Requires-Dist: pytest>=7.0
+Requires-Dist: typing-extensions>=4.0
+
+# Todo CLI
+
+A Python command-line interface application for managing todos.
+
+## Features
+
+- Add new tasks with titles and optional descriptions
+- List all tasks with their completion status
+- Update existing tasks
+- Mark tasks as complete/incomplete
+- Delete tasks
+- Cross-platform support
+
+## Requirements
+
+- Python 3.13 or higher
+
+## Installation
+
+1. Clone the repository:
+   ```bash
+   git clone <repository-url>
+   cd todo-cli
+   ```
+
+2. Install the package:
+   ```bash
+   pip install .
+   ```
+
+   Or for development:
+   ```bash
+   pip install -e .
+   ```
+
+## Usage
+
+### Adding a Task
+```bash
+todo add "Buy groceries" --description "Milk, bread, eggs"
+```
+
+### Listing All Tasks
+```bash
+todo list
+```
+
+### Updating a Task
+```bash
+todo update <task-id> --title "New title" --description "New description"
+```
+
+### Marking a Task Complete
+```bash
+todo complete <task-id>
+```
+
+### Marking a Task Incomplete
+```bash
+todo incomplete <task-id>
+```
+
+### Deleting a Task
+```bash
+todo delete <task-id>
+```
+
+## Examples
+
+```bash
+# Add a task
+todo add "Complete project proposal"
+
+# Add a task with description
+todo add "Review code" --description "Review the new feature implementation"
+
+# List all tasks
+todo list
+
+# Mark a task as complete
+todo complete 123e4567-e89b-12d3-a456-426614174000
+
+# Update a task
+todo update 123e4567-e89b-12d3-a456-426614174000 --title "Updated task title"
+
+# Delete a task
+todo delete 123e4567-e89b-12d3-a456-426614174000
+```
+
+## Development
+
+### Running Tests
+
+```bash
+# Run all tests
+pytest
+
+# Run unit tests
+pytest tests/unit/
+
+# Run integration tests
+pytest tests/integration/
+
+# Run with coverage
+pytest --cov=src/
+```
+
+### Project Structure
+
+```
+src/
+├── models/          # Data models
+│   └── task.py
+├── services/        # Business logic
+│   └── todo_service.py
+├── cli/             # Command-line interface
+│   └── todo_cli.py
+├── app.py          # Main application entry point
+└── __init__.py
+
+tests/
+├── unit/           # Unit tests
+│   ├── models/
+│   └── services/
+└── integration/    # Integration tests
+    └── cli/
+```
+
+## Architecture
+
+The application follows clean architecture principles:
+
+- **Models**: Data representation and validation
+- **Services**: Business logic and operations
+- **CLI**: User interface and command parsing
+- **Repositories**: Data access abstraction (not fully implemented in Phase 1)
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite
+6. Submit a pull request
+
+## License
+
+MIT
