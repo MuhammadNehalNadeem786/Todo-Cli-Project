@@ -1,41 +1,36 @@
 from cli.todo_cli import TodoCLI
 from services.todo_service import TodoService
+from cli.ui import show_banner, show_commands
+from rich.console import Console
+
+console = Console()
 
 def main():
-    """
-    Main entry point for the Todo CLI application.
-    Keeps running in a loop until the user types 'exit' or Ctrl+C.
-    """
     service = TodoService()
     cli = TodoCLI(service)
 
-    print("Welcome to Todo CLI! Type 'exit' to quit.\n")
+    show_banner()
+    show_commands()
 
     while True:
         try:
-            # Prompt user for input
-            user_input = input("todo> ").strip()
-            
-            # Allow user to quit
+            user_input = console.input("\n[bold cyan]todo > [/bold cyan]").strip()
+
             if user_input.lower() in ("exit", "quit"):
-                print("Goodbye!")
+                console.print("[bold yellow]Goodbye! 👋[/bold yellow]")
                 break
 
-            # Skip empty input
             if not user_input:
                 continue
 
-            # Split input into arguments like sys.argv
             args = user_input.split()
             cli.run(args)
 
         except KeyboardInterrupt:
-            # Handle Ctrl+C gracefully
-            print("\nExiting...")
+            console.print("\n[bold red]Exiting...[/bold red]")
             break
         except Exception as e:
-            # Catch any other errors without killing the process
-            print(f"Error: {e}")
+            console.print(f"[bold red]Error:[/bold red] {e}")
 
 if __name__ == "__main__":
     main()

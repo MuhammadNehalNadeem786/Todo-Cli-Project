@@ -1,85 +1,150 @@
 import argparse
 import sys
 from typing import Optional
+
 from services.todo_service import TodoService
+from cli.ui import show_tasks, success, error
 
 
 class TodoCLI:
     """
-    Command Line Interface for the Todo application.
-    Handles user input and output for all todo operations.
+    TodoCLI provides a command-line interface for managing todo tasks.
+
+    It acts as a bridge between user input (CLI commands)
+    and the core business logic implemented in TodoService.
     """
 
     def __init__(self, service: TodoService):
         """
-        Initialize the CLI with a TodoService.
+        Initialize the CLI with a TodoService instance.
 
         Args:
-            service: The TodoService instance to use for operations
+            service (TodoService): Service layer responsible for task operations.
         """
         self.service = service
         self.parser = self._create_parser()
 
     def _create_parser(self) -> argparse.ArgumentParser:
         """
-        Create the argument parser with all available commands.
+        Create and configure the argument parser with all supported commands.
 
         Returns:
-            Configured ArgumentParser
+            argparse.ArgumentParser: Configured argument parser instance.
         """
         parser = argparse.ArgumentParser(
-            description="Todo CLI - A command-line interface for managing todos",
+            description=(
+                "Todo CLI\n\n"
+                "A simple yet powerful command-line application "
+                "to manage your daily tasks efficiently."
+            ),
             formatter_class=argparse.RawDescriptionHelpFormatter,
             epilog="""
 Examples:
-  todo add "Buy groceries" --description "Milk, bread, eggs"
+  todo add "Buy groceries" -d "Milk, bread, eggs"
   todo list
-  todo update 1 --title "Updated title"
+  todo update 1 --title "Buy groceries today"
   todo complete 1
   todo incomplete 1
   todo delete 1
-            """.strip()
+            """.strip(),
         )
 
-        subparsers = parser.add_subparsers(dest='command', help='Available commands', required=True)
+        subparsers = parser.add_subparsers(
+            dest="command",
+            title="Commands",
+            description="Available todo operations",
+            help="Use one of the following commands",
+            required=True,
+        )
 
-        # Add command
-        add_parser = subparsers.add_parser('add', help='Add a new task')
-        add_parser.add_argument('title', help='Title of the task')
-        add_parser.add_argument('--description', '-d', help='Description of the task')
+        # ---------------- ADD ----------------
+        add_parser = subparsers.add_parser(
+            "add",
+            help="Add a new task",
+            description="Create a new todo task with a title and optional description",
+        )
+        add_parser.add_argument(
+            "title",
+            help="Short title of the task (required)",
+        )
+        add_parser.add_argument(
+            "--description",
+            "-d",
+            help="Detailed description of the task (optional)",
+        )
 
-        # List command
-        list_parser = subparsers.add_parser('list', help='List all tasks')
+        # ---------------- LIST ----------------
+        subparsers.add_parser(
+            "list",
+            help="List all tasks",
+            description="Display all todo tasks in a formatted table",
+        )
 
-        # Update command
-        update_parser = subparsers.add_parser('update', help='Update a task')
-        update_parser.add_argument('id', help='ID of the task to update')
-        update_parser.add_argument('--title', help='New title for the task')
-        update_parser.add_argument('--description', '-d', help='New description for the task')
+        # ---------------- UPDATE ----------------
+        update_parser = subparsers.add_parser(
+            "update",
+            help="Update an existing task",
+            description="Modify the title and/or description of a task",
+        )
+        update_parser.add_argument(
+            "id",
+            help="ID of the task to update",
+        )
+        update_parser.add_argument(
+            "--title",
+            help="New title for the task (optional)",
+        )
+        update_parser.add_argument(
+            "--description",
+            "-d",
+            help="New description for the task (optional)",
+        )
 
-        # Complete command
-        complete_parser = subparsers.add_parser('complete', help='Mark a task as complete')
-        complete_parser.add_argument('id', help='ID of the task to mark complete')
+        # ---------------- COMPLETE ----------------
+        complete_parser = subparsers.add_parser(
+            "complete",
+            help="Mark a task as complete",
+            description="Set a task's status to completed",
+        )
+        complete_parser.add_argument(
+            "id",
+            help="ID of the task to mark as complete",
+        )
 
-        # Incomplete command
-        incomplete_parser = subparsers.add_parser('incomplete', help='Mark a task as incomplete')
-        incomplete_parser.add_argument('id', help='ID of the task to mark incomplete')
+        # ---------------- INCOMPLETE ----------------
+        incomplete_parser = subparsers.add_parser(
+            "incomplete",
+            help="Mark a task as incomplete",
+            description="Revert a completed task back to incomplete",
+        )
+        incomplete_parser.add_argument(
+            "id",
+            help="ID of the task to mark as incomplete",
+        )
 
-        # Delete command
-        delete_parser = subparsers.add_parser('delete', help='Delete a task')
-        delete_parser.add_argument('id', help='ID of the task to delete')
+        # ---------------- DELETE ----------------
+        delete_parser = subparsers.add_parser(
+            "delete",
+            help="Delete a task",
+            description="Permanently remove a task from the todo list",
+        )
+        delete_parser.add_argument(
+            "id",
+            help="ID of the task to delete",
+        )
 
         return parser
 
     def run(self, args: Optional[list] = None) -> int:
         """
-        Run the CLI with the given arguments.
+        Execute the CLI using provided arguments.
 
         Args:
-            args: List of arguments to parse (default: sys.argv[1:])
+            args (list | None): Command-line arguments.
+                                Defaults to sys.argv[1:].
 
         Returns:
-            Exit code (0 for success, 1 for error)
+            int: Exit code (0 = success, 1 = error)
         """
         if args is None:
             args = sys.argv[1:]
@@ -88,172 +153,118 @@ Examples:
             parsed_args = self.parser.parse_args(args)
             return self._handle_command(parsed_args)
         except SystemExit:
-            # argparse calls sys.exit on error, so we catch it and return 1
+            # argparse handles errors internally using sys.exit
             return 1
 
     def _handle_command(self, args) -> int:
         """
-        Handle the parsed command.
+        Route the parsed command to its corresponding handler.
 
         Args:
-            args: Parsed arguments from argparse
+            args: Parsed argparse namespace.
 
         Returns:
-            Exit code (0 for success, 1 for error)
+            int: Exit code
         """
         try:
-            if args.command == 'add':
+            if args.command == "add":
                 return self._handle_add(args)
-            elif args.command == 'list':
-                return self._handle_list(args)
-            elif args.command == 'update':
+            if args.command == "list":
+                return self._handle_list()
+            if args.command == "update":
                 return self._handle_update(args)
-            elif args.command == 'complete':
+            if args.command == "complete":
                 return self._handle_complete(args)
-            elif args.command == 'incomplete':
+            if args.command == "incomplete":
                 return self._handle_incomplete(args)
-            elif args.command == 'delete':
+            if args.command == "delete":
                 return self._handle_delete(args)
-            else:
-                print(f"Unknown command: {args.command}")
-                return 1
+
+            error(f"Unknown command: {args.command}")
+            return 1
+
         except Exception as e:
-            print(f"Error: {e}", file=sys.stderr)
+            error(str(e))
             return 1
 
     def _handle_add(self, args) -> int:
         """
-        Handle the add command.
-
-        Args:
-            args: Parsed arguments for the add command
-
-        Returns:
-            Exit code (0 for success, 1 for error)
+        Create a new task using the provided title and description.
         """
         try:
             description = args.description or ""
             task = self.service.add_task(args.title, description)
-            print(f"Task added successfully with ID: {task.id}")
+            success(f"Task added successfully (ID: {task.id})")
             return 0
         except ValueError as e:
-            print(f"Error: {e}", file=sys.stderr)
+            error(str(e))
             return 1
 
-    def _handle_list(self, args) -> int:
+    def _handle_list(self) -> int:
         """
-        Handle the list command.
-
-        Args:
-            args: Parsed arguments for the list command (unused)
-
-        Returns:
-            Exit code (0 for success, 1 for error)
+        Display all tasks in a table format.
         """
         tasks = self.service.get_all_tasks()
 
         if not tasks:
-            print("No tasks found")
+            error("No tasks found")
             return 0
 
-        print(f"{'ID':<6} {'Status':<12} {'Title':<30} {'Description'}")
-        print("-" * 80)
-
-        # for task in tasks:
-        #     status = "✓ Done" if task.completed else "○ Pending"
-        #     title = task.title[:27] + "..." if len(task.title) > 30 else task.title
-        #     description = task.description[:30] + "..." if len(task.description) > 30 else task.description
-        #     print(f"{task.id} {status:<80} {title:<30} {description}")
-
-        for task in tasks:
-            status = "✓ Done" if task.completed else "Pending"
-            title = task.title[:27] + "..." if len(task.title) > 30 else task.title
-            description = (
-                task.description[:30] + "..."
-                if task.description and len(task.description) > 33
-                else (task.description or "")
-            )
-
-            print(f"{str(task.id):<6} {status:<12} {title:<30} {description}")
-            
+        show_tasks(tasks)
         return 0
 
     def _handle_update(self, args) -> int:
         """
-        Handle the update command.
-
-        Args:
-            args: Parsed arguments for the update command
-
-        Returns:
-            Exit code (0 for success, 1 for error)
+        Update an existing task's title and/or description.
         """
-        success = self.service.update_task(
+        updated = self.service.update_task(
             args.id,
             title=args.title,
-            description=args.description
+            description=args.description,
         )
 
-        if success:
-            print(f"Task {args.id} updated successfully")
+        if updated:
+            success(f"Task {args.id} updated successfully")
             return 0
-        else:
-            print(f"Error: Task with ID {args.id} not found", file=sys.stderr)
-            return 1
+
+        error(f"Task with ID {args.id} not found")
+        return 1
 
     def _handle_complete(self, args) -> int:
         """
-        Handle the complete command.
-
-        Args:
-            args: Parsed arguments for the complete command
-
-        Returns:
-            Exit code (0 for success, 1 for error)
+        Mark a task as completed.
         """
-        success = self.service.complete_task(args.id)
+        completed = self.service.complete_task(args.id)
 
-        if success:
-            print(f"Task {args.id} marked as complete")
+        if completed:
+            success(f"Task {args.id} marked as complete")
             return 0
-        else:
-            print(f"Error: Task with ID {args.id} not found", file=sys.stderr)
-            return 1
+
+        error(f"Task with ID {args.id} not found")
+        return 1
 
     def _handle_incomplete(self, args) -> int:
         """
-        Handle the incomplete command.
-
-        Args:
-            args: Parsed arguments for the incomplete command
-
-        Returns:
-            Exit code (0 for success, 1 for error)
+        Mark a completed task as incomplete.
         """
-        success = self.service.incomplete_task(args.id)
+        updated = self.service.incomplete_task(args.id)
 
-        if success:
-            print(f"Task {args.id} marked as incomplete")
+        if updated:
+            success(f"Task {args.id} marked as incomplete")
             return 0
-        else:
-            print(f"Error: Task with ID {args.id} not found", file=sys.stderr)
-            return 1
+
+        error(f"Task with ID {args.id} not found")
+        return 1
 
     def _handle_delete(self, args) -> int:
         """
-        Handle the delete command.
-
-        Args:
-            args: Parsed arguments for the delete command
-
-        Returns:
-            Exit code (0 for success, 1 for error)
+        Permanently delete a task.
         """
-        success = self.service.delete_task(args.id)
+        deleted = self.service.delete_task(args.id)
 
-        if success:
-            print(f"Task {args.id} deleted successfully")
+        if deleted:
+            success(f"Task {args.id} deleted successfully")
             return 0
-        else:
-            print(f"Error: Task with ID {args.id} not found", file=sys.stderr)
-            return 1
+
+        error(f"Task with ID {args.id} not found")
+        return 1
